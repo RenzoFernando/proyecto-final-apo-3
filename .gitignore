@@ -1,0 +1,41 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# JetBrains: PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code / Antigravity
+.vscode/
+
+# Datos pesados, pero conservando estructura
+data/raw/kaggle/*
+!data/raw/kaggle/.gitkeep
+
+data/raw/propias/*
+!data/raw/propias/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+
+# Modelos entrenados pesados, pero conservando carpeta
+models/*
+!models/.gitkeep
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Variables locales
+.env

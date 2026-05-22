@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+scikit-learn
+opencv-python
+pillow
+tensorflow
+xgboost
+joblib
+jupyter
+notebook
+ipywidgets
