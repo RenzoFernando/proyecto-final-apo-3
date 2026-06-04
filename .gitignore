@@ -292,3 +292,4 @@ pyrightconfig.json
 # Other files
 data/annotations/
 results/*
+data/*

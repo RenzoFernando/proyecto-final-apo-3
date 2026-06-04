@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clasificador de calidad</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <main class="layout">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Proyecto final APO III</p>
+                <h1>Clasificación de calidad de frutas</h1>
+                <p class="lead">Coloca la fruta o verdura a 1 metro de distancia para poder ser escaneada.</p>
+            </div>
+            <div class="status-card">
+                <span id="cameraState">Cámara inactiva</span>
+                <strong id="scanState">Listo</strong>
+            </div>
+        </section>
+
+        <section class="workspace">
+            <article class="camera-card">
+                <div class="camera-topbar">
+                    <div>
+                        <span class="label">Cámara</span>
+                        <strong>Escaneo en vivo</strong>
+                    </div>
+                    <select id="modelSelect" aria-label="Modelo"></select>
+                </div>
+                <div class="viewer">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="frame-guide"></div>
+                    <div class="distance-badge">1 metro</div>
+                </div>
+                <div class="actions">
+                    <button id="startButton" type="button">Activar cámara</button>
+                    <button id="scanButton" type="button" disabled>Escanear</button>
+                </div>
+                <canvas id="canvas"></canvas>
+            </article>
+
+            <article class="result-card">
+                <span class="label">Resultado</span>
+                <div class="quality" id="qualityValue">Sin lectura</div>
+                <div class="meter" aria-label="Porcentaje de confianza">
+                    <div id="meterFill"></div>
+                </div>
+                <div class="confidence"><span id="confidenceValue">0%</span> de confianza</div>
+                <div class="destination">
+                    <span>Destino</span>
+                    <strong id="destinationValue">Pendiente</strong>
+                </div>
+                <div class="score-list" id="scoreList"></div>
+                <div class="model-used" id="modelUsed">Modelo pendiente</div>
+            </article>
+        </section>
+    </main>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
