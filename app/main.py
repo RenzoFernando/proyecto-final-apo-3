@@ -20,6 +20,8 @@ except Exception:
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parent
 MODELS_DIR = PROJECT_ROOT / "models"
+ANNOTATIONS_DIR = PROJECT_ROOT / "data" / "annotations"
+SIZE_THRESHOLDS_PATH = ANNOTATIONS_DIR / "size_thresholds.json"
 MODEL_EXTENSIONS = {".pkl", ".joblib", ".h5", ".keras"}
 MODEL_CACHE = {}
 
@@ -30,7 +32,6 @@ QUALITY_NAMES = {
     "healthy": "Buena",
     "fresh": "Buena",
     "regular": "Regular",
-    "medium": "Regular",
     "normal": "Regular",
     "mala": "Mala",
     "malo": "Mala",
@@ -40,10 +41,25 @@ QUALITY_NAMES = {
     "damaged": "Mala"
 }
 
+SIZE_NAMES = {
+    "small": "Pequeño",
+    "pequeno": "Pequeño",
+    "pequeña": "Pequeño",
+    "pequena": "Pequeño",
+    "chico": "Pequeño",
+    "chica": "Pequeño",
+    "medium": "Mediano",
+    "mediano": "Mediano",
+    "mediana": "Mediano",
+    "regular": "Mediano",
+    "large": "Grande",
+    "grande": "Grande"
+}
+
 DESTINATIONS = {
-    "Buena": "Consumo",
-    "Regular": "Revisión",
-    "Mala": "Descarte"
+    "Buena": "Consumo o venta directa",
+    "Regular": "Revisión o consumo rápido",
+    "Mala": "Descarte o aprovechamiento no comercial"
 }
 
 
@@ -64,28 +80,6 @@ def read_json(handler):
     return json.loads(raw)
 
 
-def list_model_files():
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    items = []
-    for path in sorted(MODELS_DIR.iterdir()):
-        if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS:
-            items.append({"name": path.name, "path": str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")})
-    return items
-
-
-def safe_model_name(name):
-    if not name:
-        return None
-    path = (MODELS_DIR / name).resolve()
-    try:
-        path.relative_to(MODELS_DIR.resolve())
-    except ValueError:
-        return None
-    if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS:
-        return path
-    return None
-
-
 def config_candidates(model_path):
     return [
         model_path.with_name(model_path.stem + "_config.json"),
@@ -103,6 +97,40 @@ def read_config(model_path):
             except Exception:
                 return {}
     return {}
+
+
+def model_kind_from(path, config):
+    text = " ".join([path.stem.lower(), str(config.get("target", "")).lower(), str(config.get("task", "")).lower(), str(config.get("output", "")).lower()])
+    if "size" in text or "tamano" in text or "tamaño" in text:
+        return "size"
+    return "quality"
+
+
+def list_model_files():
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    items = []
+    for path in sorted(MODELS_DIR.iterdir()):
+        if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS:
+            config = read_config(path)
+            items.append({
+                "name": path.name,
+                "path": str(path.relative_to(PROJECT_ROOT)).replace(chr(92), "/"),
+                "kind": model_kind_from(path, config)
+            })
+    return items
+
+
+def safe_model_path(name):
+    if not name:
+        return None
+    path = (MODELS_DIR / name).resolve()
+    try:
+        path.relative_to(MODELS_DIR.resolve())
+    except ValueError:
+        return None
+    if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS:
+        return path
+    return None
 
 
 def load_model(model_path):
@@ -127,7 +155,7 @@ def load_model(model_path):
         with model_path.open("rb") as file:
             model = pickle.load(file)
         model_type = "sklearn"
-    MODEL_CACHE[key] = {"model": model, "config": config, "type": model_type}
+    MODEL_CACHE[key] = {"model": model, "config": config, "type": model_type, "kind": model_kind_from(model_path, config)}
     return MODEL_CACHE[key]
 
 
@@ -142,7 +170,7 @@ def decode_image(data_url):
     return image.convert("RGB")
 
 
-def normalized_label(value):
+def normalize_quality_label(value):
     text = str(value).strip()
     key = text.lower().replace("_", " ").replace("-", " ")
     for alias, name in QUALITY_NAMES.items():
@@ -151,18 +179,30 @@ def normalized_label(value):
     return text[:1].upper() + text[1:] if text else "Sin clase"
 
 
+def normalize_size_label(value):
+    text = str(value).strip()
+    key = text.lower().replace("_", " ").replace("-", " ")
+    for alias, name in SIZE_NAMES.items():
+        if alias in key.split() or alias in key:
+            return name
+    return text[:1].upper() + text[1:] if text else "Sin tamaño"
+
+
 def destination_for(label):
     return DESTINATIONS.get(label, "Clasificación")
 
 
-def labels_from(model, config):
-    labels = config.get("classes") or config.get("labels") or config.get("quality_labels")
+def labels_from(model, config, task):
+    if task == "size":
+        labels = config.get("size_labels") or config.get("classes") or config.get("labels")
+    else:
+        labels = config.get("quality_labels") or config.get("classes") or config.get("labels")
     if labels:
         return list(labels)
     classes = getattr(model, "classes_", None)
     if classes is not None:
         return [str(item) for item in list(classes)]
-    return ["bad", "regular", "good"]
+    return ["small", "medium", "large"] if task == "size" else ["bad", "regular", "good"]
 
 
 def image_size_from(config):
@@ -178,10 +218,11 @@ def preprocess_image(image, config, model_type):
     size = image_size_from(config)
     color_mode = str(config.get("color_mode", "RGB")).upper()
     scale = float(config.get("scale", 255.0))
+    padded = ImageOps.pad(image, size, color=(255, 255, 255), centering=(0.5, 0.5))
     if color_mode in {"L", "GRAY", "GRAYSCALE"}:
-        prepared = image.convert("L").resize(size)
+        prepared = padded.convert("L")
     else:
-        prepared = image.convert("RGB").resize(size)
+        prepared = padded.convert("RGB")
     arr = np.asarray(prepared).astype("float32")
     if scale > 0:
         arr = arr / scale
@@ -197,7 +238,7 @@ def preprocess_image(image, config, model_type):
     return arr.reshape((1,) + arr.shape)
 
 
-def scores_from_probabilities(probabilities, labels):
+def scores_from_probabilities(probabilities, labels, normalizer):
     values = np.asarray(probabilities).reshape(-1).astype(float)
     if values.size == 0:
         return []
@@ -210,23 +251,35 @@ def scores_from_probabilities(probabilities, labels):
     scores = []
     for index, value in enumerate(values):
         label = labels[index] if index < len(labels) else str(index)
-        scores.append({"label": normalized_label(label), "value": round(float(value) * 100, 1)})
+        scores.append({"label": normalizer(label), "value": round(float(value) * 100, 1)})
     return sorted(scores, key=lambda item: item["value"], reverse=True)
 
 
-def predict_with_model(image, model_name):
-    model_path = safe_model_name(model_name)
+def predict_model_task(image, model_name, task):
+    model_path = safe_model_path(model_name)
     if model_path is None:
-        return provisional_prediction(image, "Análisis provisional")
+        return None
     package = load_model(model_path)
     model = package["model"]
     config = package["config"]
     model_type = package["type"]
-    labels = labels_from(model, config)
+    labels = labels_from(model, config, task)
+    normalizer = normalize_size_label if task == "size" else normalize_quality_label
     x = preprocess_image(image, config, model_type)
     if hasattr(model, "predict_proba"):
         probabilities = model.predict_proba(x)[0]
-        scores = scores_from_probabilities(probabilities, labels)
+        scores = scores_from_probabilities(probabilities, labels, normalizer)
+        label = scores[0]["label"] if scores else "Sin clase"
+        confidence = scores[0]["value"] if scores else 0.0
+    elif hasattr(model, "decision_function"):
+        decision = np.asarray(model.decision_function(x))
+        values = decision.reshape(-1).astype(float)
+        if values.size == 1 and len(labels) == 2:
+            positive = 1.0 / (1.0 + np.exp(-values[0]))
+            probabilities = np.array([1.0 - positive, positive])
+        else:
+            probabilities = values
+        scores = scores_from_probabilities(probabilities, labels, normalizer)
         label = scores[0]["label"] if scores else "Sin clase"
         confidence = scores[0]["value"] if scores else 0.0
     else:
@@ -235,27 +288,81 @@ def predict_with_model(image, model_name):
             prediction = np.asarray(prediction)
         arr = np.asarray(prediction)
         if arr.ndim >= 2 and arr.shape[-1] > 1:
-            scores = scores_from_probabilities(arr[0], labels)
+            scores = scores_from_probabilities(arr[0], labels, normalizer)
             label = scores[0]["label"] if scores else "Sin clase"
             confidence = scores[0]["value"] if scores else 0.0
         else:
             raw = arr.reshape(-1)[0]
             if isinstance(raw, (np.integer, int)) and int(raw) < len(labels):
                 raw = labels[int(raw)]
-            label = normalized_label(raw)
+            label = normalizer(raw)
             confidence = 100.0
             scores = [{"label": label, "value": confidence}]
+    return {"label": label, "confidence": round(float(confidence), 1), "scores": scores[:3], "model": model_path.name}
+
+
+def estimate_size_features(image, image_size=160):
+    working_image = ImageOps.pad(image, (image_size, image_size), color=(255, 255, 255), centering=(0.5, 0.5))
+    array = np.asarray(working_image).astype(np.float32)
+    border_pixels = np.concatenate([
+        array[:5, :, :].reshape(-1, 3),
+        array[-5:, :, :].reshape(-1, 3),
+        array[:, :5, :].reshape(-1, 3),
+        array[:, -5:, :].reshape(-1, 3)
+    ], axis=0)
+    background = np.median(border_pixels, axis=0)
+    distance = np.linalg.norm(array - background, axis=2)
+    threshold = max(18.0, float(np.percentile(distance, 75)) * 0.75)
+    mask = distance > threshold
+    y_indices, x_indices = np.where(mask)
+    if len(x_indices) == 0 or len(y_indices) == 0:
+        object_area_ratio = 0.0
+        diameter_px = 0.0
+    else:
+        object_area_ratio = float(mask.mean())
+        diameter_px = float(np.sqrt(4 * mask.sum() / np.pi))
+    normalized_diameter = float(diameter_px / image_size)
+    return object_area_ratio, normalized_diameter
+
+
+def read_size_thresholds():
+    if not SIZE_THRESHOLDS_PATH.exists():
+        return None
+    try:
+        return json.loads(SIZE_THRESHOLDS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def visual_size_prediction(image):
+    object_area_ratio, normalized_diameter = estimate_size_features(image)
+    thresholds = read_size_thresholds()
+    if thresholds and thresholds.get("global"):
+        q1 = float(thresholds["global"]["q1"])
+        q2 = float(thresholds["global"]["q2"])
+    else:
+        q1 = 0.46
+        q2 = 0.64
+    if normalized_diameter <= q1:
+        label = "Pequeño"
+        margin = q1 - normalized_diameter
+    elif normalized_diameter <= q2:
+        label = "Mediano"
+        margin = min(normalized_diameter - q1, q2 - normalized_diameter)
+    else:
+        label = "Grande"
+        margin = normalized_diameter - q2
+    confidence = float(np.clip(58 + margin * 120, 52, 92))
     return {
-        "quality": label,
-        "confidence": round(float(confidence), 1),
-        "destination": destination_for(label),
-        "model": model_path.name,
-        "scores": scores[:3],
-        "timestamp": int(time.time())
+        "label": label,
+        "confidence": round(confidence, 1),
+        "object_area_ratio": round(object_area_ratio, 4),
+        "normalized_diameter": round(normalized_diameter, 4),
+        "model": "Estimación visual"
     }
 
 
-def provisional_prediction(image, model_name):
+def provisional_quality_prediction(image):
     arr = np.asarray(image.resize((160, 160))).astype("float32") / 255.0
     gray = arr.mean(axis=2)
     max_channel = arr.max(axis=2)
@@ -263,7 +370,7 @@ def provisional_prediction(image, model_name):
     saturation = np.mean((max_channel - min_channel) / np.maximum(max_channel, 0.001))
     brightness = float(gray.mean())
     dark_area = float((gray < 0.23).mean())
-    bright_area = float((gray > 0.72).mean())
+    bright_area = float((gray > 0.74).mean())
     dx = np.abs(np.diff(gray, axis=1)).mean()
     dy = np.abs(np.diff(gray, axis=0)).mean()
     texture = float((dx + dy) * 4.0)
@@ -292,12 +399,26 @@ def provisional_prediction(image, model_name):
     total = sum(raw_scores.values())
     scores = [{"label": name, "value": round(value / total * 100, 1)} for name, value in raw_scores.items()]
     scores = sorted(scores, key=lambda item: item["value"], reverse=True)
+    return {"label": label, "confidence": round(confidence, 1), "scores": scores[:3], "model": "Análisis provisional"}
+
+
+def predict(image, quality_model_name, size_model_name):
+    quality_prediction = predict_model_task(image, quality_model_name, "quality") or provisional_quality_prediction(image)
+    size_prediction = predict_model_task(image, size_model_name, "size")
+    visual_size = visual_size_prediction(image)
+    if size_prediction is None:
+        size_prediction = visual_size
     return {
-        "quality": label,
-        "confidence": round(confidence, 1),
-        "destination": destination_for(label),
-        "model": model_name,
-        "scores": scores[:3],
+        "quality": quality_prediction["label"],
+        "confidence": quality_prediction["confidence"],
+        "destination": destination_for(quality_prediction["label"]),
+        "size": size_prediction["label"],
+        "size_confidence": size_prediction["confidence"],
+        "object_area_ratio": visual_size["object_area_ratio"],
+        "normalized_diameter": visual_size["normalized_diameter"],
+        "quality_model": quality_prediction["model"],
+        "size_model": size_prediction["model"],
+        "scores": quality_prediction["scores"],
         "timestamp": int(time.time())
     }
 
@@ -330,7 +451,7 @@ class AppHandler(BaseHTTPRequestHandler):
         try:
             payload = read_json(self)
             image = decode_image(payload.get("image"))
-            result = predict_with_model(image, payload.get("model"))
+            result = predict(image, payload.get("quality_model") or payload.get("model"), payload.get("size_model"))
             json_response(self, result)
         except Exception as exc:
             json_response(self, {"error": str(exc)}, status=400)

@@ -3,57 +3,73 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Clasificador de calidad</title>
+    <title>Clasificador de calidad y tamaño</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <main class="layout">
-        <section class="hero">
-            <div>
+    <main class="app-shell">
+        <header class="topbar">
+            <div class="title-block">
                 <p class="eyebrow">Proyecto final APO III</p>
-                <h1>Clasificación de calidad de frutas</h1>
-                <p class="lead">Coloca la fruta o verdura a 1 metro de distancia para poder ser escaneada.</p>
+                <h1>Clasificación de frutas y verduras</h1>
+                <p class="lead">Captura o sube una imagen individual sobre fondo simple para estimar calidad y tamaño relativo.</p>
             </div>
-            <div class="status-card">
+            <div class="status-panel">
                 <span id="cameraState">Cámara inactiva</span>
                 <strong id="scanState">Listo</strong>
             </div>
+        </header>
+
+        <section class="model-row">
+            <label>
+                <span>Modelo calidad</span>
+                <select id="qualityModelSelect" aria-label="Modelo de calidad"></select>
+            </label>
+            <label>
+                <span>Modelo tamaño</span>
+                <select id="sizeModelSelect" aria-label="Modelo de tamaño"></select>
+            </label>
         </section>
 
         <section class="workspace">
-            <article class="camera-card">
-                <div class="camera-topbar">
-                    <div>
-                        <span class="label">Cámara</span>
-                        <strong>Escaneo en vivo</strong>
-                    </div>
-                    <select id="modelSelect" aria-label="Modelo"></select>
-                </div>
+            <article class="scanner-card">
                 <div class="viewer">
                     <video id="video" autoplay playsinline muted></video>
+                    <img id="previewImage" alt="Vista previa">
                     <div class="frame-guide"></div>
-                    <div class="distance-badge">1 metro</div>
+                    <div class="distance-badge">1 metro aprox.</div>
                 </div>
                 <div class="actions">
                     <button id="startButton" type="button">Activar cámara</button>
-                    <button id="scanButton" type="button" disabled>Escanear</button>
+                    <label class="file-action" for="imageInput">Subir imagen</label>
+                    <input id="imageInput" type="file" accept="image/*">
+                    <button id="scanButton" type="button" disabled>Analizar</button>
                 </div>
                 <canvas id="canvas"></canvas>
             </article>
 
             <article class="result-card">
-                <span class="label">Resultado</span>
-                <div class="quality" id="qualityValue">Sin lectura</div>
+                <div class="result-grid">
+                    <div class="result-tile main-result">
+                        <span>Calidad</span>
+                        <strong id="qualityValue">Sin lectura</strong>
+                        <small><b id="confidenceValue">0%</b> de confianza</small>
+                    </div>
+                    <div class="result-tile">
+                        <span>Tamaño</span>
+                        <strong id="sizeValue">Pendiente</strong>
+                        <small id="sizeDetail">Diámetro relativo pendiente</small>
+                    </div>
+                    <div class="result-tile">
+                        <span>Destino</span>
+                        <strong id="destinationValue">Pendiente</strong>
+                        <small id="modelUsed">Modelo pendiente</small>
+                    </div>
+                </div>
                 <div class="meter" aria-label="Porcentaje de confianza">
                     <div id="meterFill"></div>
                 </div>
-                <div class="confidence"><span id="confidenceValue">0%</span> de confianza</div>
-                <div class="destination">
-                    <span>Destino</span>
-                    <strong id="destinationValue">Pendiente</strong>
-                </div>
                 <div class="score-list" id="scoreList"></div>
-                <div class="model-used" id="modelUsed">Modelo pendiente</div>
             </article>
         </section>
     </main>
