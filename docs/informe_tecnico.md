@@ -94,7 +94,7 @@ siendo *A* el área segmentada. Finalmente, los valores obtenidos se dividieron 
 
 Antes del entrenamiento, todas las imágenes fueron redimensionadas a 128 × 128 píxeles y normalizadas mediante:
 
-$$x_norm = x / 255$$
+$$x_{norm} = x / 255$$
 
 Esta transformación reduce diferencias de escala entre los valores de entrada y favorece la estabilidad numérica durante el entrenamiento de los modelos.
 
