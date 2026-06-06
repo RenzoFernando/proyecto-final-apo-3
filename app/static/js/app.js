@@ -33,6 +33,12 @@ const hudProduct = document.getElementById("hudProduct");
 const hudDistance = document.getElementById("hudDistance");
 const hudFrame = document.getElementById("hudFrame");
 
+const CAPTURE_ROI_RATIO = 0.66;
+const MIN_DISTANCE_CM = 10;
+const MAX_DISTANCE_CM = 100;
+const DEFAULT_DISTANCE_CM = 20;
+document.documentElement.style.setProperty("--capture-ratio", `${CAPTURE_ROI_RATIO * 100}%`);
+
 let stream = null;
 let scanning = false;
 let pendingScan = false;
@@ -65,10 +71,25 @@ function setLiveState(text, active) {
     viewer.classList.toggle("live", Boolean(active));
 }
 
+function normalizeDistanceValue(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+        return DEFAULT_DISTANCE_CM;
+    }
+    return Math.max(MIN_DISTANCE_CM, Math.min(MAX_DISTANCE_CM, number));
+}
+
+function normalizeDistanceInput() {
+    const value = normalizeDistanceValue(distanceInput.value);
+    distanceInput.value = String(value);
+    return value;
+}
+
 function refreshHud() {
     const product = selectedProduct();
+    const distance = normalizeDistanceValue(distanceInput.value);
     hudProduct.textContent = product ? product.label : "Sin selección";
-    hudDistance.textContent = `${Number(distanceInput.value || 100).toFixed(0)} cm`;
+    hudDistance.textContent = `${distance.toFixed(0)} cm`;
     hudFrame.textContent = `Lecturas: ${readCount}`;
 }
 
@@ -212,7 +233,8 @@ function clearImage() {
 function captureFrame() {
     const width = video.videoWidth || 1280;
     const height = video.videoHeight || 720;
-    const side = Math.min(width, height);
+    const visibleSide = Math.min(width, height);
+    const side = Math.max(1, Math.floor(visibleSide * CAPTURE_ROI_RATIO));
     const sourceX = Math.floor((width - side) / 2);
     const sourceY = Math.floor((height - side) / 2);
     canvas.width = side;
@@ -223,7 +245,7 @@ function captureFrame() {
     context.scale(-1, 1);
     context.drawImage(video, sourceX, sourceY, side, side, 0, 0, side, side);
     context.restore();
-    return canvas.toDataURL("image/jpeg", 0.9);
+    return canvas.toDataURL("image/jpeg", 0.92);
 }
 
 function currentImageData() {
@@ -243,8 +265,9 @@ function requestPayload(image, pair) {
         quality_model: pair.quality_model,
         size_model: pair.size_model,
         product_key: productSelect.value || "unknown",
-        distance_cm: Number(distanceInput.value || 100),
-        fov_degrees: Number(fovInput.value || 60)
+        distance_cm: normalizeDistanceInput(),
+        fov_degrees: Number(fovInput.value || 60),
+        roi_ratio: uploadedImage ? 1 : CAPTURE_ROI_RATIO
     };
 }
 
@@ -376,6 +399,9 @@ productSelect.addEventListener("change", () => {
         refreshHud();
     });
     input.addEventListener("change", () => {
+        if (input === distanceInput) {
+            normalizeDistanceInput();
+        }
         refreshHud();
         if (uploadedImage || stream) {
             scanCurrentImage();

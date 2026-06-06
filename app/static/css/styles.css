@@ -15,6 +15,7 @@
     --warn: #9a6a13;
     --danger: #9f3732;
     --shadow: 0 14px 34px rgba(31, 45, 61, 0.1);
+    --capture-ratio: 66%;
 }
 
 * {
@@ -214,6 +215,7 @@ video,
     height: 100%;
     object-fit: cover;
     display: block;
+    background: #111827;
 }
 
 video {
@@ -224,6 +226,7 @@ video {
     display: none;
     position: absolute;
     inset: 0;
+    object-position: center;
 }
 
 .viewer.has-image video {
@@ -236,22 +239,26 @@ video {
 
 .frame-guide {
     position: absolute;
-    width: min(74%, 420px, 78vh);
+    height: var(--capture-ratio);
     aspect-ratio: 1 / 1;
+    max-width: calc(100% - 48px);
+    max-height: calc(100% - 96px);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 2px solid rgba(255, 255, 255, 0.92);
+    border: 2px solid rgba(255, 255, 255, 0.96);
     border-radius: 26px;
-    box-shadow: 0 0 0 999px rgba(17, 24, 39, 0.18);
+    box-shadow: 0 0 0 999px rgba(17, 24, 39, 0.5), 0 0 0 1px rgba(47, 93, 124, 0.35) inset;
     pointer-events: none;
+    z-index: 2;
 }
 
 .hud {
     position: absolute;
     color: var(--text);
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(216, 222, 232, 0.92);
+    z-index: 3;
 }
 
 .hud-product {
@@ -292,9 +299,11 @@ video {
 }
 
 .hud-bottom {
-    left: 12px;
-    right: 12px;
+    left: 50%;
+    right: auto;
     bottom: 12px;
+    width: min(420px, calc(100% - 40px));
+    transform: translateX(-50%);
     padding: 8px 10px;
     border-radius: 14px;
     display: flex;
@@ -313,11 +322,16 @@ video {
 
 button,
 .file-action {
+    min-height: 54px;
     border: 1px solid var(--line-strong);
     border-radius: 14px;
     padding: 9px 10px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    line-height: 1.18;
     font-weight: 850;
     color: var(--accent-strong);
     background: #ffffff;
@@ -514,7 +528,7 @@ button:disabled {
     }
 
     .frame-guide {
-        width: min(76%, 360px);
+        height: 62%;
     }
 
     .actions {
