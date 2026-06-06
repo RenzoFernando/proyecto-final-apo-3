@@ -3,32 +3,41 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Clasificador de calidad y tamaño</title>
+    <title>Inspector de frutas y verduras</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <main class="app-shell">
         <header class="topbar">
             <div class="title-block">
-                <p class="eyebrow">Proyecto final APO III</p>
-                <h1>Clasificación de frutas y verduras</h1>
-                <p class="lead">Captura o sube una imagen individual sobre fondo simple para estimar calidad y tamaño relativo.</p>
+                <p class="eyebrow">Proyecto final APO III · Visión por computador</p>
+                <h1>Inspector de línea para frutas y verduras</h1>
+                <p class="lead">Selecciona el producto, define la distancia de captura y analiza calidad, tamaño y medida estimada desde cámara o imagen fija.</p>
             </div>
             <div class="status-panel">
                 <span id="cameraState">Cámara inactiva</span>
-                <strong id="scanState">Listo</strong>
+                <strong id="scanState">Sistema listo</strong>
             </div>
         </header>
 
-        <section class="model-row">
+        <section class="control-deck">
             <label>
-                <span>Modelo calidad</span>
-                <select id="qualityModelSelect" aria-label="Modelo de calidad"></select>
+                <span>Producto</span>
+                <select id="productSelect" aria-label="Producto evaluado"></select>
             </label>
             <label>
-                <span>Modelo tamaño</span>
-                <select id="sizeModelSelect" aria-label="Modelo de tamaño"></select>
+                <span>Modelo</span>
+                <select id="modelPairSelect" aria-label="Modelo de evaluación"></select>
             </label>
+            <label>
+                <span>Distancia cm</span>
+                <input id="distanceInput" type="number" min="20" max="250" step="5" value="100" aria-label="Distancia en centímetros">
+            </label>
+            <input id="fovInput" type="hidden" value="60">
+            <div class="active-model">
+                <span>Par activo</span>
+                <strong id="activeModelSummary">Buscando modelos</strong>
+            </div>
         </section>
 
         <section class="workspace">
@@ -37,19 +46,39 @@
                     <video id="video" autoplay playsinline muted></video>
                     <img id="previewImage" alt="Vista previa">
                     <div class="frame-guide"></div>
-                    <div class="distance-badge">1 metro aprox.</div>
+                    <div class="hud hud-product">
+                        <span>Producto</span>
+                        <strong id="hudProduct">Sin selección</strong>
+                    </div>
+                    <div class="hud hud-live" id="liveBadge">Sin señal</div>
+                    <div class="hud hud-bottom">
+                        <span id="hudDistance">100 cm</span>
+                        <span id="hudFrame">Lecturas: 0</span>
+                    </div>
                 </div>
                 <div class="actions">
                     <button id="startButton" type="button">Activar cámara</button>
+                    <button id="stopButton" type="button" disabled>Detener cámara</button>
+                    <button id="toggleAnalysisButton" type="button" disabled>Iniciar análisis</button>
+                    <button id="scanButton" type="button" disabled>Analizar ahora</button>
                     <label class="file-action" for="imageInput">Subir imagen</label>
                     <input id="imageInput" type="file" accept="image/*">
-                    <button id="scanButton" type="button" disabled>Analizar</button>
+                    <button id="clearButton" type="button" disabled>Limpiar imagen</button>
                 </div>
                 <canvas id="canvas"></canvas>
             </article>
 
             <article class="result-card">
+                <div class="result-head">
+                    <span>Resultado de inspección</span>
+                    <strong id="resultTimestamp">Sin lectura</strong>
+                </div>
                 <div class="result-grid">
+                    <div class="result-tile product-result">
+                        <span>Producto seleccionado</span>
+                        <strong id="productValue">Pendiente</strong>
+                        <small id="productDetail">No se detecta automáticamente</small>
+                    </div>
                     <div class="result-tile main-result">
                         <span>Calidad</span>
                         <strong id="qualityValue">Sin lectura</strong>
@@ -58,12 +87,17 @@
                     <div class="result-tile">
                         <span>Tamaño</span>
                         <strong id="sizeValue">Pendiente</strong>
-                        <small id="sizeDetail">Diámetro relativo pendiente</small>
+                        <small id="sizeDetail">Sin medida</small>
                     </div>
                     <div class="result-tile">
+                        <span>Medida estimada</span>
+                        <strong id="sizeCmValue">-- cm</strong>
+                        <small id="sizeCmDetail">Calibra distancia para mejorar lectura</small>
+                    </div>
+                    <div class="result-tile destination-tile">
                         <span>Destino</span>
                         <strong id="destinationValue">Pendiente</strong>
-                        <small id="modelUsed">Modelo pendiente</small>
+                        <small id="destinationDetail">Según calidad predicha</small>
                     </div>
                 </div>
                 <div class="meter" aria-label="Porcentaje de confianza">
