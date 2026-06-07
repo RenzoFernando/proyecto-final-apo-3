@@ -94,6 +94,12 @@ Entre las tareas realizadas destacan:
 └── requirements.txt
 ```
 
+## Modelos entrenados
+
+Por limitaciones de tamaño de GitHub, los modelos CNN entrenados (`cnn_quality.keras` y `cnn_size.keras`) no se encuentran incluidos en este repositorio, ya que cada archivo supera el límite de 100 MB permitido por la plataforma. Los notebooks incluidos en el proyecto permiten reproducir completamente el proceso de entrenamiento y generar nuevamente dichos modelos a partir de los datos originales.
+
+Los modelos tradicionales (SVM y Random Forest) sí se encuentran disponibles dentro del repositorio debido a su menor tamaño.
+
 ## Instalación
 
 Crear un entorno virtual:
