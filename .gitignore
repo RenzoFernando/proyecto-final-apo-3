@@ -5,6 +5,8 @@
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
+models/*.keras
+
 # IPython
 profile_default/
 ipython_config.py
