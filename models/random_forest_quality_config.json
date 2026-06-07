@@ -1,0 +1,37 @@
+{
+  "task": "quality",
+  "target": "quality",
+  "classes": [
+    "bad",
+    "regular",
+    "good"
+  ],
+  "labels": [
+    "bad",
+    "regular",
+    "good"
+  ],
+  "quality_labels": [
+    "bad",
+    "regular",
+    "good"
+  ],
+  "size_labels": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "img_size": [
+    48,
+    48
+  ],
+  "image_size": [
+    48,
+    48
+  ],
+  "color_mode": "RGB",
+  "scale": 255.0,
+  "flatten": true,
+  "model_family": "random_forest",
+  "preprocessing": "ImageOps.pad, RGB, resize, numpy flatten, scale 255"
+}

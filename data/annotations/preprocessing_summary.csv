@@ -1,0 +1,20 @@
+metric,value
+total_images_after_validation,6241
+removed_invalid_images,0
+removed_duplicate_images,33
+flagged_review_images,7505
+excluded_noise_images,2562
+train_images,3744
+train_balanced_images,1854
+val_images,1248
+test_images,1249
+image_size,128x128
+quality_classes,"bad, regular, good"
+size_classes,"small, medium, large"
+size_thresholds_path,data/annotations/size_thresholds.json
+labels_processed_path,data/annotations/labels_processed.csv
+train_path,data/annotations/train_metadata.csv
+train_balanced_path,data/annotations/train_metadata_balanced.csv
+val_path,data/annotations/val_metadata.csv
+test_path,data/annotations/test_metadata.csv
+processed_dir,data/processed

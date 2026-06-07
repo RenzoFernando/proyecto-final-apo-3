@@ -290,6 +290,5 @@ pyrightconfig.json
 .ionide
 
 # Other files
-data/annotations/
-results/*
-data/*
+data/raw/*
+data/processed/*

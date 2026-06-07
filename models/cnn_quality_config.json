@@ -1,0 +1,28 @@
+{
+  "task": "quality",
+  "target": "quality",
+  "classes": [
+    "bad",
+    "regular",
+    "good"
+  ],
+  "labels": [
+    "bad",
+    "regular",
+    "good"
+  ],
+  "img_size": [
+    128,
+    128
+  ],
+  "image_size": [
+    128,
+    128
+  ],
+  "color_mode": "RGB",
+  "scale": 255.0,
+  "flatten": false,
+  "model_family": "cnn",
+  "variant": "C_mas_capacidad",
+  "preprocessing": "ImageOps.pad, RGB, 128x128, numpy array, scale /255"
+}

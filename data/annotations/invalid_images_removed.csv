@@ -1,0 +1,1 @@
+image_id,source,quality_label,quality_label_es,fruit_type,product_type,size_label_manual,relative_path,file_name,width,height,aspect_ratio,is_square,requires_crop,mode,file_size_kb,blur_score,brightness_mean,brightness_std,skin_tone_ratio,border_std,foreground_ratio_border,image_hash,exists,valid_image,validated_width,validated_height,image_mode,validation_error

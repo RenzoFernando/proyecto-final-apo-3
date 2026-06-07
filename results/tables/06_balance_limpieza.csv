@@ -1,0 +1,13 @@
+quality,size_label,before,after
+bad,large,188,35.0
+bad,medium,111,35.0
+bad,small,263,35.0
+bad,0,999,0.0
+good,large,35,35.0
+good,medium,973,35.0
+good,small,197,35.0
+good,0,1394,0.0
+regular,large,1345,35.0
+regular,medium,484,35.0
+regular,small,1108,35.0
+regular,0,1673,0.0

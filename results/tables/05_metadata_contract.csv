@@ -1,0 +1,9 @@
+column,description
+path,Ruta relativa de la imagen dentro del proyecto
+quality,Etiqueta de calidad detectada desde carpeta o nombre
+manual_size,Tamaño manual detectado si existe
+product,Producto detectado desde carpeta o nombre
+width,Ancho original
+height,Alto original
+is_duplicate,Marca duplicados por hash
+needs_review,Marca imágenes que conviene revisar antes de entrenar

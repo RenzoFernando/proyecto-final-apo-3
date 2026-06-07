@@ -1,0 +1,4 @@
+split,apple,banana,guava,lime,orange,pomegranate
+test,183,235,219,152,142,318
+train,609,646,592,548,449,900
+val,179,230,193,169,147,330

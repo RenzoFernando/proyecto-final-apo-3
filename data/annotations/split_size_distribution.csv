@@ -1,0 +1,4 @@
+split,small,medium,large
+train,1250,1249,1245
+val,416,416,416
+test,416,417,416

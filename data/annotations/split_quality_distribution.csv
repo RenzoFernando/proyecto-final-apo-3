@@ -1,0 +1,4 @@
+split,bad,regular,good
+train,618,2110,1016
+val,206,703,339
+test,206,705,338

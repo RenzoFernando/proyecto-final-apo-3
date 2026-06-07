@@ -1,0 +1,5 @@
+target,model,model_path,config_path
+quality,Random Forest,models/random_forest_quality.pkl,models/random_forest_quality_config.json
+quality,SVM lineal,models/svm_quality.pkl,models/svm_quality_config.json
+size,Random Forest,models/random_forest_size.pkl,models/random_forest_size_config.json
+size,SVM lineal,models/svm_size.pkl,models/svm_size_config.json

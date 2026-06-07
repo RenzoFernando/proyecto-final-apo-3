@@ -1,0 +1,3 @@
+target,recommended_model,test_accuracy,test_f1_macro,train_test_gap_f1_macro
+quality,Random Forest,0.9584,0.9465,0.0521
+size,Random Forest,0.7582,0.7582,0.2418

@@ -1,0 +1,81 @@
+{
+    "global": {
+        "q1": 0.597139723334418,
+        "q2": 0.9045591626586637
+    },
+    "by_product": {
+        "apple": {
+            "q1": 0.5049923743095899,
+            "q2": 0.9024516757991412
+        },
+        "banana": {
+            "q1": 0.642213044752786,
+            "q2": 0.8447200335329205
+        },
+        "guava": {
+            "q1": 0.4955829858519079,
+            "q2": 0.814620359265061
+        },
+        "lime": {
+            "q1": 0.4715294723159236,
+            "q2": 0.7791076976361739
+        },
+        "orange": {
+            "q1": 0.45172819717405494,
+            "q2": 0.8298607032715892
+        },
+        "pomegranate": {
+            "q1": 0.9174245115763556,
+            "q2": 0.9761507874149417
+        }
+    },
+    "product_size_cm_thresholds": {
+        "apple": {
+            "small_medium_cm": 6.5,
+            "medium_large_cm": 8.5
+        },
+        "manzana": {
+            "small_medium_cm": 6.5,
+            "medium_large_cm": 8.5
+        },
+        "lemon": {
+            "small_medium_cm": 4.8,
+            "medium_large_cm": 6.3
+        },
+        "limon": {
+            "small_medium_cm": 4.8,
+            "medium_large_cm": 6.3
+        },
+        "lime": {
+            "small_medium_cm": 4.5,
+            "medium_large_cm": 6.0
+        },
+        "naranja": {
+            "small_medium_cm": 6.0,
+            "medium_large_cm": 8.0
+        },
+        "orange": {
+            "small_medium_cm": 6.0,
+            "medium_large_cm": 8.0
+        },
+        "mandarina": {
+            "small_medium_cm": 5.0,
+            "medium_large_cm": 7.0
+        },
+        "tomate": {
+            "small_medium_cm": 5.0,
+            "medium_large_cm": 7.5
+        },
+        "banana": {
+            "small_medium_cm": 13.0,
+            "medium_large_cm": 18.0
+        },
+        "platano": {
+            "small_medium_cm": 13.0,
+            "medium_large_cm": 18.0
+        }
+    },
+    "reference_distance_cm": 100.0,
+    "default_object_distance_cm": 100.0,
+    "camera_horizontal_fov_degrees": 60.0
+}

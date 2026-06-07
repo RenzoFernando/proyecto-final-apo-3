@@ -1,0 +1,9 @@
+target,dataset,model,accuracy,precision_macro,recall_macro,f1_macro,f1_weighted,kappa,labels
+quality,test,Baseline mayoría,0.5645,0.1882,0.3333,0.2405,0.4073,0.0,"bad, regular, good"
+size,test,Baseline mayoría,0.3331,0.111,0.3333,0.1666,0.1664,0.0,"small, medium, large"
+quality,test,Random Forest,0.9584,0.9507,0.9425,0.9465,0.9582,0.9279,"bad, regular, good"
+quality,test,SVM lineal,0.8927,0.86,0.8575,0.8583,0.8917,0.8153,"bad, regular, good"
+size,test,Random Forest,0.7582,0.7683,0.7583,0.7582,0.7582,0.6373,"small, medium, large"
+size,test,SVM lineal,0.6709,0.6692,0.671,0.6696,0.6695,0.5064,"small, medium, large"
+quality,test,CNN,0.9792,0.9794,0.9656,0.9721,0.979,0.9639,"bad, regular, good"
+size,test,CNN,0.7758,0.7818,0.7759,0.7779,0.7778,0.6637,"small, medium, large"
