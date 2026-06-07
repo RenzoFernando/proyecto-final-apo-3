@@ -292,5 +292,4 @@ pyrightconfig.json
 .ionide
 
 # Other files
-data/raw/*
 data/processed/*
